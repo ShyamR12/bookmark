@@ -48,6 +48,22 @@
           <button id="export-button" class="footer-link" type="button">Export</button>
         </div>
       </footer>
+
+      <input id="import-file" class="sr-only" type="file" accept="application/json,.json" />
+      <dialog id="import-dialog" class="import-dialog" aria-labelledby="import-heading">
+        <form method="dialog">
+          <h2 id="import-heading">Import bookmarks</h2>
+          <fieldset>
+            <legend>Choose how to import</legend>
+            <label><input type="radio" name="import-mode" value="merge" checked /> <span><strong>Merge</strong> — keep local bookmarks when URLs match</span></label>
+            <label><input type="radio" name="import-mode" value="replace" /> <span><strong>Replace</strong> — delete the current library first</span></label>
+          </fieldset>
+          <div class="dialog-actions">
+            <button class="text-button" value="cancel" type="submit">Cancel</button>
+            <button id="choose-import-file" class="dialog-primary" value="default" type="button">Choose JSON file</button>
+          </div>
+        </form>
+      </dialog>
     </main>
     <script type="module" src="/src/popup.ts"></script>
   </body>
