@@ -17,6 +17,7 @@ const importDialog = document.querySelector<HTMLDialogElement>("#import-dialog")
 const importFile = document.querySelector<HTMLInputElement>("#import-file")!;
 const chooseImportFile = document.querySelector<HTMLButtonElement>("#choose-import-file")!;
 const feedbackLink = document.querySelector<HTMLAnchorElement>("#feedback-link")!;
+const shell = document.querySelector<HTMLElement>(".popup-shell")!;
 let activeBookmark: Bookmark | undefined;
 let activeTab: chrome.tabs.Tab | undefined;
 let pendingImportMode: "merge" | "replace" = "merge";
@@ -30,25 +31,18 @@ function currentRank(): Rank {
   return document.querySelector<HTMLInputElement>('input[name="rank"]:checked')!.value as Rank;
 }
 
-function showExistingBookmark(bookmark: Bookmark) {
+function showExisting(bookmark: Bookmark | undefined) {
   activeBookmark = bookmark;
-  existingPanel.hidden = false;
-  bookmarkButton.hidden = true;
-  rankSelect.value = bookmark.rank;
-  document.querySelector<HTMLElement>(".popup-shell")!.classList.add("is-existing");
+  existingPanel.hidden = !bookmark;
+  bookmarkButton.hidden = Boolean(bookmark);
+  shell.classList.toggle("is-existing", Boolean(bookmark));
+  if (bookmark) rankSelect.value = bookmark.rank;
 }
 
 async function findCurrentBookmark() {
   const normalized = activeTab?.url ? normalizeUrl(activeTab.url) : null;
   if (!normalized) return;
-  activeBookmark = await db.bookmarks.where("normalizedUrl").equals(normalized).first();
-  if (activeBookmark) {
-    showExistingBookmark(activeBookmark);
-  } else {
-    existingPanel.hidden = true;
-    bookmarkButton.hidden = false;
-    document.querySelector<HTMLElement>(".popup-shell")!.classList.remove("is-existing");
-  }
+  showExisting(await db.bookmarks.where("normalizedUrl").equals(normalized).first());
 }
 
 async function capture() {
@@ -59,11 +53,17 @@ async function capture() {
   try {
     const existing = await db.bookmarks.where("normalizedUrl").equals(normalizedUrl).first();
     if (existing) {
-      showExistingBookmark(existing);
+      showExisting(existing);
       setStatus("This page is already bookmarked.");
       return;
     }
-    await db.bookmarks.add({ url: activeTab.url, normalizedUrl, title: pageTitle(activeTab.title ?? "", activeTab.url), rank: currentRank(), time: new Date().toISOString() });
+    await db.bookmarks.add({
+      url: activeTab.url,
+      normalizedUrl,
+      title: pageTitle(activeTab.title ?? "", activeTab.url),
+      rank: currentRank(),
+      time: new Date().toISOString()
+    });
     setStatus("Saved to your reading list.");
     window.setTimeout(() => window.close(), 550);
   } catch {
@@ -85,7 +85,9 @@ async function changeRank() {
   } catch {
     rankSelect.value = oldRank;
     setStatus("Couldn’t update the rank. Please try again.", true);
-  } finally { rankSelect.disabled = false; }
+  } finally {
+    rankSelect.disabled = false;
+  }
 }
 
 async function deleteBookmark() {
@@ -93,69 +95,31 @@ async function deleteBookmark() {
   deleteButton.disabled = true;
   try {
     await db.bookmarks.delete(activeBookmark.id);
-    activeBookmark = undefined;
-    existingPanel.hidden = true;
-    bookmarkButton.hidden = false;
-    document.querySelector<HTMLElement>(".popup-shell")!.classList.remove("is-existing");
+    showExisting(undefined);
     setStatus("Bookmark deleted.");
-  } catch { setStatus("Couldn’t delete this bookmark. Please try again.", true); }
-  finally { deleteButton.disabled = false; }
+  } catch {
+    setStatus("Couldn’t delete this bookmark. Please try again.", true);
+  } finally {
+    deleteButton.disabled = false;
+  }
 }
 
-async function openBookmark(bookmark: Bookmark, button: HTMLButtonElement) {
+async function readingList() {
+  const committed = await db.bookmarks.where("rank").equals("tbr").toArray();
+  return committed.length > 0 ? committed : db.bookmarks.where("rank").equals("tbr-candidate").toArray();
+}
+
+async function openFromList(button: HTMLButtonElement, pick: (bookmarks: Bookmark[]) => Bookmark) {
   button.disabled = true;
   try {
-    await chrome.tabs.create({ url: bookmark.url });
+    const bookmarks = await readingList();
+    if (bookmarks.length === 0) return setStatus("Your reading list is empty");
+    await chrome.tabs.create({ url: pick(bookmarks).url });
   } catch {
     setStatus("Couldn’t open this bookmark. Please try again.", true);
   } finally {
     button.disabled = false;
   }
-}
-
-async function openRandomBookmark() {
-  randomButton.disabled = true;
-  try {
-    let eligible = await db.bookmarks.where("rank").equals("tbr").toArray();
-    if (eligible.length === 0) eligible = await db.bookmarks.where("rank").equals("tbr-candidate").toArray();
-    if (eligible.length === 0) return setStatus("Your reading list is empty");
-
-    const previous = await db.settings.get("last-random-bookmark");
-    const alternatives = eligible.filter((bookmark) => bookmark.id !== previous?.value);
-    const choices = alternatives.length > 0 ? alternatives : eligible;
-    const selected = choices[Math.floor(Math.random() * choices.length)];
-    await db.settings.put({ key: "last-random-bookmark", value: selected.id! });
-    await openBookmark(selected, randomButton);
-  } catch {
-    setStatus("Couldn’t choose a bookmark. Please try again.", true);
-  } finally {
-    randomButton.disabled = false;
-  }
-}
-
-async function openLatestBookmark() {
-  latestButton.disabled = true;
-  try {
-    let latest = await db.bookmarks.where("rank").equals("tbr").toArray();
-    if (latest.length === 0) latest = await db.bookmarks.where("rank").equals("tbr-candidate").toArray();
-    if (latest.length === 0) return setStatus("Your reading list is empty");
-    latest.sort((first, second) => second.time.localeCompare(first.time));
-    await openBookmark(latest[0], latestButton);
-  } catch {
-    setStatus("Couldn’t find the latest bookmark. Please try again.", true);
-  } finally {
-    latestButton.disabled = false;
-  }
-}
-
-function bookmarkWithoutId(bookmark: Bookmark): Omit<Bookmark, "id"> {
-  return {
-    url: bookmark.url,
-    normalizedUrl: bookmark.normalizedUrl,
-    title: bookmark.title,
-    rank: bookmark.rank,
-    time: bookmark.time
-  };
 }
 
 async function exportBookmarks() {
@@ -183,23 +147,13 @@ async function applyImport(bookmarks: Bookmark[], mode: "merge" | "replace"): Pr
       if (bookmarks.length > 0) await db.bookmarks.bulkAdd(bookmarks);
       return bookmarks.length;
     }
-
     if (bookmarks.length === 0) return 0;
     const existing = await db.bookmarks.where("normalizedUrl").anyOf(bookmarks.map((bookmark) => bookmark.normalizedUrl)).toArray();
-    const existingUrls = new Set(existing.map((bookmark) => bookmark.normalizedUrl));
-    const additions = bookmarks.filter((bookmark) => !existingUrls.has(bookmark.normalizedUrl)).map(bookmarkWithoutId);
+    const have = new Set(existing.map((bookmark) => bookmark.normalizedUrl));
+    const additions = bookmarks.filter((bookmark) => !have.has(bookmark.normalizedUrl));
     if (additions.length > 0) await db.bookmarks.bulkAdd(additions);
     return additions.length;
   });
-}
-
-function showImportDialog() {
-  if (!importDialog.open) importDialog.showModal();
-}
-
-function chooseFile() {
-  pendingImportMode = document.querySelector<HTMLInputElement>('input[name="import-mode"]:checked')!.value as "merge" | "replace";
-  importFile.click();
 }
 
 async function importBookmarks() {
@@ -209,8 +163,7 @@ async function importBookmarks() {
   chooseImportFile.disabled = true;
   importDialog.close();
   try {
-    const bookmarks = parseImport(await file.text());
-    const importedCount = await applyImport(bookmarks, pendingImportMode);
+    const importedCount = await applyImport(parseImport(await file.text()), pendingImportMode);
     const action = pendingImportMode === "replace" ? "Imported" : "Added";
     setStatus(`${action} ${importedCount} bookmark${importedCount === 1 ? "" : "s"}.`);
     await findCurrentBookmark();
@@ -224,15 +177,26 @@ async function importBookmarks() {
   }
 }
 
-bookmarkButton.addEventListener("click", capture);
-rankSelect.addEventListener("change", changeRank);
-deleteButton.addEventListener("click", deleteBookmark);
-document.querySelector<HTMLButtonElement>("#library-button")!.addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("library.html") }));
-randomButton.addEventListener("click", openRandomBookmark);
-latestButton.addEventListener("click", openLatestBookmark);
-importButton.addEventListener("click", showImportDialog);
+bookmarkButton.addEventListener("click", () => void capture());
+rankSelect.addEventListener("change", () => void changeRank());
+deleteButton.addEventListener("click", () => void deleteBookmark());
+document.querySelector<HTMLButtonElement>("#library-button")!.addEventListener("click", () => {
+  void chrome.tabs.create({ url: chrome.runtime.getURL("library.html") });
+});
+randomButton.addEventListener("click", () => {
+  void openFromList(randomButton, (bookmarks) => bookmarks[Math.floor(Math.random() * bookmarks.length)]);
+});
+latestButton.addEventListener("click", () => {
+  void openFromList(latestButton, (bookmarks) => bookmarks.sort((first, second) => second.time.localeCompare(first.time))[0]);
+});
+importButton.addEventListener("click", () => {
+  if (!importDialog.open) importDialog.showModal();
+});
 exportButton.addEventListener("click", () => void exportBookmarks());
-chooseImportFile.addEventListener("click", chooseFile);
+chooseImportFile.addEventListener("click", () => {
+  pendingImportMode = document.querySelector<HTMLInputElement>('input[name="import-mode"]:checked')!.value as "merge" | "replace";
+  importFile.click();
+});
 importFile.addEventListener("change", () => void importBookmarks());
 feedbackLink.href = feedbackUrl(chrome.runtime.getManifest().version);
 feedbackLink.addEventListener("click", (event) => {
@@ -244,7 +208,9 @@ async function initialize() {
   try {
     [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
     await findCurrentBookmark();
-  } catch { setStatus("Couldn’t read the current page.", true); }
+  } catch {
+    setStatus("Couldn’t read the current page.", true);
+  }
 }
 
 void initialize();

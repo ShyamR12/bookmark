@@ -1,6 +1,14 @@
 import Dexie, { type EntityTable } from "dexie";
 
-export type Rank = "tbr-candidate" | "tbr" | "s" | "a" | "b";
+export const RANKS = ["tbr-candidate", "tbr", "s", "a", "b"] as const;
+export type Rank = (typeof RANKS)[number];
+export const RANK_LABELS: Record<Rank, string> = {
+  "tbr-candidate": "TBR?",
+  tbr: "TBR",
+  s: "S",
+  a: "A",
+  b: "B"
+};
 
 export interface Bookmark {
   id?: number;
@@ -11,19 +19,14 @@ export interface Bookmark {
   time: string;
 }
 
-interface Setting {
-  key: string;
-  value: number;
-}
-
 class BookmarkDatabase extends Dexie {
   bookmarks!: EntityTable<Bookmark, "id">;
-  settings!: EntityTable<Setting, "key">;
 
   constructor() {
     super("bookmarkit");
     this.version(1).stores({ bookmarks: "++id,&normalizedUrl,rank,time" });
     this.version(2).stores({ bookmarks: "++id,&normalizedUrl,rank,time", settings: "&key" });
+    this.version(3).stores({ bookmarks: "++id,&normalizedUrl,rank,time", settings: null });
   }
 }
 

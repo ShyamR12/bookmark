@@ -9,7 +9,6 @@
     <main class="library-shell">
       <header class="library-header">
         <div>
-          <p class="library-kicker">Bookmarkit</p>
           <h1>Your library</h1>
         </div>
         <p id="library-status" class="library-status" role="status" aria-live="polite"></p>
@@ -38,13 +37,10 @@
           <table>
             <thead>
               <tr>
-                <th scope="col" class="number-column">Sr. no.</th>
                 <th scope="col">Title</th>
-                <th scope="col" class="rank-column">
-                  <button class="sort-button" type="button" data-sort="rank" aria-label="Sort by rank">Rank <span aria-hidden="true"></span></button>
-                </th>
+                <th scope="col" class="rank-column">Rank</th>
                 <th scope="col" class="date-column" aria-sort="descending">
-                  <button class="sort-button is-active" type="button" data-sort="date" aria-label="Sort by date, newest first">Date <span aria-hidden="true">↓</span></button>
+                  <button id="date-sort" class="sort-button" type="button">Date <span aria-hidden="true">↓</span></button>
                 </th>
                 <th scope="col" class="delete-column">Delete</th>
               </tr>
