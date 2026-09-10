@@ -1,5 +1,6 @@
 import "./styles.css";
 import { db, type Bookmark, type Rank } from "./database";
+import { feedbackUrl } from "./feedback";
 import { createExport, parseImport } from "./import-export";
 import { normalizeUrl, pageTitle } from "./url";
 
@@ -15,6 +16,7 @@ const exportButton = document.querySelector<HTMLButtonElement>("#export-button")
 const importDialog = document.querySelector<HTMLDialogElement>("#import-dialog")!;
 const importFile = document.querySelector<HTMLInputElement>("#import-file")!;
 const chooseImportFile = document.querySelector<HTMLButtonElement>("#choose-import-file")!;
+const feedbackLink = document.querySelector<HTMLAnchorElement>("#feedback-link")!;
 let activeBookmark: Bookmark | undefined;
 let activeTab: chrome.tabs.Tab | undefined;
 let pendingImportMode: "merge" | "replace" = "merge";
@@ -232,6 +234,11 @@ importButton.addEventListener("click", showImportDialog);
 exportButton.addEventListener("click", () => void exportBookmarks());
 chooseImportFile.addEventListener("click", chooseFile);
 importFile.addEventListener("change", () => void importBookmarks());
+feedbackLink.href = feedbackUrl(chrome.runtime.getManifest().version);
+feedbackLink.addEventListener("click", (event) => {
+  event.preventDefault();
+  void chrome.tabs.create({ url: feedbackLink.href });
+});
 
 async function initialize() {
   try {

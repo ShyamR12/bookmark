@@ -28,7 +28,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .library-action { width: min(100%, 180px); }
 .footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 5px; }
 .footer-right { display: flex; gap: 18px; }
-.footer-link { border: 0; border-bottom: 1px solid #252525; padding: 0 0 2px; color: #252525; background: transparent; font-weight: 700; font-size: 13px; }
+.footer-link { border: 0; border-bottom: 1px solid #252525; padding: 0 0 2px; color: #252525; background: transparent; font-weight: 700; font-size: 13px; text-decoration: none; }
 .footer-link:hover { color: #59554f; }
 .import-dialog { width: calc(100% - 28px); max-width: 430px; border: 2px solid var(--ink); border-radius: 16px; padding: 20px; color: var(--ink); background: #fff; }
 .import-dialog::backdrop { background: rgb(0 0 0 / 35%); }
