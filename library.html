@@ -1,11 +1,65 @@
 <!doctype html>
 <html lang="en">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Bookmarkit Library</title></head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookmarkit Library</title>
+  </head>
   <body class="library-page">
-    <main class="library-placeholder">
-      <p class="eyebrow">Bookmarkit</p>
-      <h1>Your Library</h1>
-      <p>Library management is the next part of Bookmarkit.</p>
+    <main class="library-shell">
+      <header class="library-header">
+        <div>
+          <p class="library-kicker">Bookmarkit</p>
+          <h1>Your library</h1>
+        </div>
+        <p id="library-status" class="library-status" role="status" aria-live="polite"></p>
+      </header>
+
+      <section class="library-controls" aria-label="Library controls">
+        <label class="search-control">
+          <span class="sr-only">Search title or URL</span>
+          <input id="search-input" type="search" placeholder="Search by title or URL" autocomplete="off" />
+        </label>
+        <details id="rank-filter" class="filter-control">
+          <summary><span id="rank-filter-label">TBR</span></summary>
+          <div class="rank-options" aria-label="Filter by rank">
+            <label><input id="all-ranks" type="checkbox" /> All ranks</label>
+            <label><input type="checkbox" value="tbr-candidate" /> TBR?</label>
+            <label><input type="checkbox" value="tbr" checked /> TBR</label>
+            <label><input type="checkbox" value="s" /> S</label>
+            <label><input type="checkbox" value="a" /> A</label>
+            <label><input type="checkbox" value="b" /> B</label>
+          </div>
+        </details>
+      </section>
+
+      <section class="library-grid" aria-label="Saved bookmarks">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col" class="number-column">Sr. no.</th>
+                <th scope="col">Title</th>
+                <th scope="col" class="rank-column">
+                  <button class="sort-button" type="button" data-sort="rank" aria-label="Sort by rank">Rank <span aria-hidden="true"></span></button>
+                </th>
+                <th scope="col" class="date-column" aria-sort="descending">
+                  <button class="sort-button is-active" type="button" data-sort="date" aria-label="Sort by date, newest first">Date <span aria-hidden="true">↓</span></button>
+                </th>
+                <th scope="col" class="delete-column">Delete</th>
+              </tr>
+            </thead>
+            <tbody id="bookmark-rows"></tbody>
+          </table>
+        </div>
+        <p id="empty-state" class="empty-state" hidden></p>
+      </section>
+
+      <div id="undo-toast" class="undo-toast" role="status" aria-live="polite" hidden>
+        <span>Bookmark deleted.</span>
+        <button id="undo-button" type="button">Undo</button>
+      </div>
     </main>
+    <script type="module" src="/src/library.ts"></script>
   </body>
 </html>
