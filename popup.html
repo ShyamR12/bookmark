@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookmarkit</title>
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="capture-row" aria-label="Save current page">
+        <fieldset class="rank-radios">
+          <legend class="sr-only">Initial rank</legend>
+          <label><input type="radio" name="rank" value="tbr-candidate" checked /> <span>TBR?</span></label>
+          <label><input type="radio" name="rank" value="tbr" /> <span>TBR</span></label>
+        </fieldset>
+        <button id="bookmark-button" class="bookmark-button" type="button">Bookmarkit</button>
+      </header>
+
+      <section id="existing-panel" class="existing-panel" hidden aria-labelledby="existing-heading">
+        <p id="existing-heading" class="eyebrow">Already in your library</p>
+        <div class="rank-editor">
+          <label for="rank-select">Current rank</label>
+          <select id="rank-select" aria-label="Change bookmark rank">
+            <option value="tbr-candidate">TBR?</option>
+            <option value="tbr">TBR</option>
+            <option value="s">S</option>
+            <option value="a">A</option>
+            <option value="b">B</option>
+          </select>
+          <button id="delete-button" class="text-button danger" type="button">Delete</button>
+        </div>
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <nav class="actions" aria-label="Bookmark actions">
+        <button id="random-button" class="primary-action" type="button">Open Random Bookmark</button>
+        <button id="latest-button" class="primary-action" type="button">Open Latest Bookmark</button>
+        <button id="library-button" class="primary-action library-action" type="button">Open Library</button>
+      </nav>
+
+      <footer class="footer">
+        <button id="feedback-button" class="footer-link" type="button">Share feedback</button>
+        <div class="footer-right">
+          <button id="import-button" class="footer-link" type="button">Import</button>
+          <button id="export-button" class="footer-link" type="button">Export</button>
+        </div>
+      </footer>
+    </main>
+    <script type="module" src="/src/popup.ts"></script>
+  </body>
+</html>
