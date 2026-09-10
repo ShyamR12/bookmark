@@ -17,16 +17,18 @@
       </header>
 
       <section id="existing-panel" class="existing-panel" hidden aria-labelledby="existing-heading">
-        <p id="existing-heading" class="eyebrow">Already in your library</p>
+        <p id="existing-heading" class="eyebrow">Already in library</p>
         <div class="rank-editor">
-          <label for="rank-select">Current rank</label>
-          <select id="rank-select" aria-label="Change bookmark rank">
-            <option value="tbr-candidate">TBR?</option>
-            <option value="tbr">TBR</option>
-            <option value="s">S</option>
-            <option value="a">A</option>
-            <option value="b">B</option>
-          </select>
+          <label class="sr-only" for="rank-select">Current rank</label>
+          <div class="select-wrap">
+            <select id="rank-select" aria-label="Change bookmark rank">
+              <option value="tbr-candidate">TBR?</option>
+              <option value="tbr">TBR</option>
+              <option value="s">S</option>
+              <option value="a">A</option>
+              <option value="b">B</option>
+            </select>
+          </div>
           <button id="delete-button" class="text-button danger" type="button">Delete</button>
         </div>
       </section>

@@ -11,12 +11,19 @@ export interface Bookmark {
   time: string;
 }
 
+interface Setting {
+  key: string;
+  value: number;
+}
+
 class BookmarkDatabase extends Dexie {
   bookmarks!: EntityTable<Bookmark, "id">;
+  settings!: EntityTable<Setting, "key">;
 
   constructor() {
     super("bookmarkit");
     this.version(1).stores({ bookmarks: "++id,&normalizedUrl,rank,time" });
+    this.version(2).stores({ bookmarks: "++id,&normalizedUrl,rank,time", settings: "&key" });
   }
 }
 

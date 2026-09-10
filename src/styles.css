@@ -1,4 +1,4 @@
-:root { color: #222; background: #f8f7f3; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+:root { --ink: #252525; --control-radius: 10px; color: var(--ink); background: #f8f7f3; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 340px; }
 button, select, input { font: inherit; }
@@ -9,15 +9,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .rank-radios { display: flex; gap: 11px; margin: 0; padding: 0; border: 0; }
 .rank-radios label { display: flex; align-items: center; gap: 5px; white-space: nowrap; font-weight: 700; font-size: 14px; }
 .rank-radios input { width: 16px; height: 16px; accent-color: #252525; }
-.bookmark-button, .primary-action { border: 2px solid #252525; color: #252525; background: #fff; border-radius: 10px; font-weight: 750; }
+.bookmark-button, .primary-action { border: 2px solid var(--ink); color: var(--ink); background: #fff; border-radius: var(--control-radius); font-weight: 750; }
 .bookmark-button { min-height: 38px; padding: 0 17px; }
-.bookmark-button:hover, .primary-action:hover { background: #252525; color: #fff; }
-.existing-panel { border: 1px solid #d9d5cc; border-radius: 10px; background: #fffdf9; padding: 12px; }
-.eyebrow { margin: 0; color: #666157; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.rank-editor { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 13px; font-weight: 700; }
-.rank-editor select { flex: 1; min-width: 0; border: 1px solid #9e9a91; border-radius: 6px; background: white; padding: 5px; }
-.text-button { border: 0; border-bottom: 1px solid currentColor; padding: 2px 0; background: transparent; font-weight: 700; }
+.bookmark-button:hover, .primary-action:hover { background: var(--ink); color: #fff; }
+.existing-panel { align-self: center; width: min(100%, 455px); border: 2px solid var(--ink); border-radius: 16px; background: #fff; padding: 16px 18px; }
+.eyebrow { margin: 0; color: var(--ink); font-size: 16px; font-weight: 800; letter-spacing: 0; text-transform: none; }
+.rank-editor { display: flex; align-items: center; gap: 16px; margin-top: 10px; font-size: 14px; font-weight: 700; }
+.select-wrap { position: relative; flex: 1; min-width: 0; }
+.select-wrap::after { content: ""; position: absolute; top: 50%; right: 16px; width: 10px; height: 10px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); pointer-events: none; transform: translateY(-65%) rotate(45deg); }
+.rank-editor select { width: 100%; min-height: 42px; appearance: none; border: 2px solid var(--ink); border-radius: var(--control-radius); background: white; padding: 5px 42px 5px 12px; color: var(--ink); font-size: 17px; font-weight: 750; }
+.text-button { min-height: 42px; border: 0; border-bottom: 1px solid currentColor; padding: 2px 0; background: transparent; font-weight: 700; }
 .danger { color: #9c2921; }
+.popup-shell.is-existing .capture-row { display: none; }
 .status { min-height: 18px; margin: -4px 0 0; text-align: center; color: #2b6e40; font-size: 12px; font-weight: 650; }
 .status.error { color: #a42a23; }
 .actions { display: grid; justify-items: center; align-content: center; gap: 18px; flex: 1; min-height: 190px; }
@@ -31,4 +34,4 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .library-page { min-width: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
 .library-placeholder { width: min(560px, 100%); border: 1px solid #d9d5cc; border-radius: 12px; padding: 32px; background: #fffdf9; }
 .library-placeholder h1 { margin: 6px 0; }
-@media (max-height: 420px) { .popup-shell { min-height: 100vh; padding: 14px; gap: 9px; } .actions { min-height: 110px; gap: 8px; } .primary-action { min-height: 38px; } .existing-panel { padding: 8px; } }
+@media (max-height: 420px) { .popup-shell { min-height: 100vh; padding: 14px; gap: 9px; } .actions { min-height: 110px; gap: 8px; } .primary-action { min-height: 38px; } .existing-panel { padding: 8px 12px; } }
