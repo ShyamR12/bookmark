@@ -16,9 +16,9 @@ describe("popup markup", () => {
 });
 
 describe("library markup", () => {
-  it("uses a native auto popover for the rank filter", () => {
-    expect(library).toContain('popovertarget="rank-options"');
-    expect(library).toMatch(/id="rank-options"[^>]*popover="auto"|popover="auto"[^>]*id="rank-options"/);
+  it("uses a native auto popover for the tier filter", () => {
+    expect(library).toContain('popovertarget="tier-options"');
+    expect(library).toMatch(/id="tier-options"[^>]*popover="auto"|popover="auto"[^>]*id="tier-options"/);
   });
 
   it("uses a manual popover for undo and a single live region", () => {
@@ -29,6 +29,15 @@ describe("library markup", () => {
 
   it("declares light and dark color schemes", () => {
     expect(library).toContain('<meta name="color-scheme" content="light dark"');
+  });
+
+  it("exposes import, export, feedback, and an empty-library import CTA", () => {
+    expect(library).toContain('id="import-button"');
+    expect(library).toContain('id="export-button"');
+    expect(library).toMatch(/id="feedback-link"[^>]*target="_blank"|target="_blank"[^>]*id="feedback-link"/);
+    expect(library).toMatch(/id="import-file"[^>]*type="file"|type="file"[^>]*id="import-file"/);
+    expect(library).toMatch(/accept="application\/json,\.json"/);
+    expect(library).toContain('id="empty-import"');
   });
 });
 

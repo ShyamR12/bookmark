@@ -5,10 +5,10 @@ const bookmark = {
   url: "https://example.com/a?utm_source=x",
   normalizedUrl: "https://example.com/a",
   title: "Example",
-  rank: "tbr" as const,
+  tier: "tbr" as const,
   time: "2026-01-02T03:04:05.000Z"
 };
-const exportedBookmark = { url: bookmark.url, title: bookmark.title, rank: bookmark.rank, time: bookmark.time };
+const exportedBookmark = { url: bookmark.url, title: bookmark.title, tier: bookmark.tier, time: bookmark.time };
 
 describe("createExport", () => {
   it("writes schema version 1 without database keys", () => {
@@ -44,7 +44,7 @@ describe("parseImport", () => {
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, url: "chrome://extensions" }] }))).toThrow("invalid URL");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [bookmark, bookmark] }))).toThrow("duplicate URL");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, title: "  " }] }))).toThrow("empty title");
-    expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, rank: "z" }] }))).toThrow("invalid rank");
+    expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, tier: "z" }] }))).toThrow("invalid tier");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, time: "soon" }] }))).toThrow("invalid stored time");
   });
 });
@@ -56,4 +56,3 @@ describe("mergeAdditions", () => {
     expect(mergeAdditions([bookmark], [bookmark.normalizedUrl])).toEqual([]);
   });
 });
-

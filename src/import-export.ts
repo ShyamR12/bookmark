@@ -1,7 +1,7 @@
-import { RANKS, type Bookmark, type Rank } from "./database";
+import { TIERS, type Bookmark, type Tier } from "./database";
 import { normalizeUrl } from "./url";
 
-const ranks = new Set<Rank>(RANKS);
+const tiers = new Set<Tier>(TIERS);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -15,7 +15,7 @@ export function createExport(bookmarks: Bookmark[], now = new Date()) {
   return {
     schemaVersion: 1 as const,
     exportedAt: now.toISOString(),
-    bookmarks: bookmarks.map(({ url, title, rank, time }) => ({ url, title, rank, time }))
+    bookmarks: bookmarks.map(({ url, title, tier, time }) => ({ url, title, tier, time }))
   };
 }
 
@@ -33,9 +33,9 @@ function parseBookmark(item: unknown, index: number, seen: Set<string>): Bookmar
   assert(!seen.has(normalizedUrl), "The file contains a duplicate URL.");
   seen.add(normalizedUrl);
   assert(typeof item.title === "string" && item.title.trim() !== "", `${label} has an empty title.`);
-  assert(typeof item.rank === "string" && ranks.has(item.rank as Rank), `${label} has an invalid rank.`);
+  assert(typeof item.tier === "string" && tiers.has(item.tier as Tier), `${label} has an invalid tier.`);
   assert(typeof item.time === "string" && !Number.isNaN(Date.parse(item.time)), `${label} has an invalid stored time.`);
-  return { url: item.url, normalizedUrl, title: item.title, rank: item.rank as Rank, time: item.time };
+  return { url: item.url, normalizedUrl, title: item.title, tier: item.tier as Tier, time: item.time };
 }
 
 export function parseImport(contents: string): Bookmark[] {

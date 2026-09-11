@@ -8,14 +8,14 @@
 Bookmarkit
 
 **Short Description** [REQUIRED]
-Save the current page to a private reading list, rank what you finish, and open something to read.
+Save the current page to a private reading list, assign a tier when you finish, and open something to read.
 
 **Detailed Description** [REQUIRED]
 Bookmarkit is a private reading list for pages you mean to come back to. It lives in your browser and does not require an account.
 
-Save the page you are on, keep a to-be-read list, and rank finished items as S, A, or B. Open a random or latest unread item when you want something to read. Search and filter the full library, change ranks, and delete with a short undo window.
+Save the page you are on, keep a to-be-read list, and put finished items in S, A, or B tiers. Open a random or latest unread item when you want something to read. Search and filter the full library, change tiers, and delete with a short undo window. Import and export your list from the library, or share feedback from there.
 
-How to use it: click the Bookmarkit icon to see the current page's title and site. Choose a rank (TBR?, TBR, S, A, or B) and save. If the page is already saved, change its rank or remove it. Use Random or Latest to open something from your unread list, or open Library for search, filters, and the full list.
+How to use it: click the Bookmarkit icon to see the current page's title and site. Choose a tier (TBR?, TBR, S, A, or B) and save. If the page is already saved, change its tier or remove it. Use Random or Latest to open something from your unread list, or open Library for search, filters, the full list, import, export, and feedback.
 
 Your list stays on this computer. Bookmarkit does not sign you in, does not sync, and does not send your pages to a server. The only permission it asks for is access to the tab you opened it from, so it can save that page's address and title.
 
@@ -25,7 +25,7 @@ Questions or problems: email shyamrandar12@gmail.com.
 Productivity
 
 **Single Purpose** [REQUIRED]
-Saves web pages into a private local reading list and lets you rank and reopen them.
+Saves web pages into a private local reading list and lets you assign tiers and reopen them.
 
 **Primary Language** [REQUIRED]
 English
@@ -51,7 +51,7 @@ English
 | Personal communications | No | No | | |
 | Location | No | No | | |
 | Web history | No full history. URLs you explicitly save are stored locally. | No | Reopen and de-duplicate your reading list | No |
-| User activity | Ranks and saved times for items you add | No | Show and sort your list | No |
+| User activity | Tiers and saved times for items you add | No | Show and sort your list | No |
 | Website content | Page titles of pages you save | No | Label items in the library | No |
 
 ### Data Use Certification
@@ -73,7 +73,7 @@ Last updated: 11 September 2026
 Bookmarkit is a local-first reading list. It does not create an account and it does not send your reading list to a server.
 
 What stays on your computer
-When you save a page, Bookmarkit stores that page's address, title, rank, and the time you saved or last ranked it. This data stays in your browser on this device. It is not synced across computers.
+When you save a page, Bookmarkit stores that page's address, title, tier, and the time you saved or last changed its tier. This data stays in your browser on this device. It is not synced across computers.
 
 What is not collected
 Bookmarkit does not record your full browsing history, does not use cookies or analytics, and does not load third-party scripts.
@@ -113,4 +113,4 @@ shyamrandar12@gmail.com
 
 | Version | Date | Changes | Status |
 |---------|------|---------|--------|
-| 0.1.0 | 2026-09-11 | Popup shows page title and host, five-rank pills, Bookmarkit vs Remove; Random/Latest/Library in the top nav. Import/export/feedback parked. | Draft |
+| 0.1.0 | 2026-09-11 | Popup shows page title and host, five-tier pills, Bookmarkit vs Remove; Random/Latest/Library in the top nav. Library header has import, export, and share feedback. | Draft |

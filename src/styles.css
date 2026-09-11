@@ -113,7 +113,7 @@ button {
     margin-top: 6px;
 }
 
-.rank-pills {
+.tier-pills {
     display: flex;
     overflow: hidden;
     background: var(--track);
@@ -251,6 +251,36 @@ button {
     margin-bottom: 24px;
 }
 
+.library-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    gap: 8px;
+}
+
+.library-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.library-actions :is(button, a) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+        color: var(--ink);
+    }
+
+    svg {
+        flex-shrink: 0;
+    }
+}
+
 .library-controls {
     display: flex;
     flex-wrap: wrap;
@@ -272,13 +302,13 @@ button {
 }
 
 .filter-button {
-    anchor-name: --rank-filter;
+    anchor-name: --tier-filter;
     text-align: left;
 }
 
-.rank-options {
+.tier-options {
     position: absolute;
-    position-anchor: --rank-filter;
+    position-anchor: --tier-filter;
     inset: calc(anchor(bottom) + 4px) auto auto anchor(left);
     margin: 0;
     width: anchor-size(width);
@@ -358,6 +388,24 @@ button {
 .empty-state {
     padding: 40px;
     text-align: center;
+}
+
+#empty-import:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 auto 40px;
+    color: var(--muted);
+    font-weight: 700;
+
+    &:hover {
+        color: var(--ink);
+    }
+
+    svg {
+        flex-shrink: 0;
+    }
 }
 
 .undo-toast {
