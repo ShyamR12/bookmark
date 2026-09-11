@@ -40,19 +40,15 @@
           <span class="sr-only">Search title or URL</span>
           <input id="search-input" type="search" placeholder="Search by title or URL" autocomplete="off" />
         </label>
-        <div class="filter-control">
-          <button type="button" id="tier-filter-button" class="filter-button" popovertarget="tier-options">
-            <span id="tier-filter-label">TBR</span>
-          </button>
-          <div id="tier-options" class="tier-options" popover="auto" aria-label="Filter by tier">
-            <label><input id="all-tiers" type="checkbox" /> All tiers</label>
-            <label><input type="checkbox" value="tbr-candidate" /> TBR?</label>
-            <label><input type="checkbox" value="tbr" checked /> TBR</label>
-            <label><input type="checkbox" value="s" /> S</label>
-            <label><input type="checkbox" value="a" /> A</label>
-            <label><input type="checkbox" value="b" /> B</label>
-          </div>
-        </div>
+        <fieldset id="tier-options" class="tier-filter">
+          <legend class="sr-only">Filter by tier</legend>
+          <button type="button" id="select-all-tiers">Select all</button>
+          <label><input type="checkbox" value="tbr-candidate" /> TBR?</label>
+          <label><input type="checkbox" value="tbr" checked /> TBR</label>
+          <label><input type="checkbox" value="s" /> S</label>
+          <label><input type="checkbox" value="a" /> A</label>
+          <label><input type="checkbox" value="b" /> B</label>
+        </fieldset>
       </section>
 
       <section class="library-grid" aria-label="Saved bookmarks">

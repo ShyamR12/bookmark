@@ -4,13 +4,12 @@ import { feedbackUrl } from "./feedback";
 import { createExport, mergeAdditions, parseImport } from "./import-export";
 import { emptyMessage, visibleBookmarks } from "./library-query";
 import { hideManualPopover, showManualPopover } from "./popover";
-import { syncTierSelection, tierFilterLabel } from "./tier-filter";
+import { toggleAllTiers } from "./tier-filter";
 
 const rows = document.querySelector<HTMLTableSectionElement>("#bookmark-rows")!;
 const searchInput = document.querySelector<HTMLInputElement>("#search-input")!;
 const tierFilter = document.querySelector<HTMLElement>("#tier-options")!;
-const tierFilterLabelEl = document.querySelector<HTMLElement>("#tier-filter-label")!;
-const allTiers = document.querySelector<HTMLInputElement>("#all-tiers")!;
+const selectAllTiers = document.querySelector<HTMLButtonElement>("#select-all-tiers")!;
 const tierCheckboxes = [...tierFilter.querySelectorAll<HTMLInputElement>("input[value]")];
 const emptyState = document.querySelector<HTMLElement>("#empty-state")!;
 const emptyImport = document.querySelector<HTMLButtonElement>("#empty-import")!;
@@ -52,10 +51,6 @@ function escapeHtml(value: string) {
 
 function checkedTiers(): Tier[] {
   return tierCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value as Tier);
-}
-
-function updateFilterLabel() {
-  tierFilterLabelEl.textContent = tierFilterLabel(checkedTiers());
 }
 
 function rowId(from: HTMLElement) {
@@ -163,9 +158,12 @@ function actionElement<T extends HTMLElement>(event: Event, action: string) {
   return (event.target as HTMLElement).closest<T>(`[data-action="${action}"]`);
 }
 
-function onTierFilterChange(event: Event) {
-  syncTierSelection(event.target as HTMLInputElement, allTiers, tierCheckboxes);
-  updateFilterLabel();
+function onTierFilterChange() {
+  render();
+}
+
+function onSelectAllTiers() {
+  toggleAllTiers(tierCheckboxes);
   render();
 }
 
@@ -221,6 +219,7 @@ async function importBookmarks() {
 }
 
 searchInput.addEventListener("input", render);
+selectAllTiers.addEventListener("click", onSelectAllTiers);
 tierFilter.addEventListener("change", onTierFilterChange);
 dateSort.addEventListener("click", toggleDateSort);
 rows.addEventListener("change", (event) => updateTier(actionElement(event, "change-tier")));
@@ -241,5 +240,4 @@ async function initialize() {
   if (await render()) await showIdleCount();
 }
 
-updateFilterLabel();
 initialize();

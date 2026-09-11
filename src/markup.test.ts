@@ -16,9 +16,12 @@ describe("popup markup", () => {
 });
 
 describe("library markup", () => {
-  it("uses a native auto popover for the tier filter", () => {
-    expect(library).toContain('popovertarget="tier-options"');
-    expect(library).toMatch(/id="tier-options"[^>]*popover="auto"|popover="auto"[^>]*id="tier-options"/);
+  it("uses an inline multi-select tier filter", () => {
+    expect(library).toContain('id="select-all-tiers"');
+    expect(library).toContain("Select all");
+    expect(library).not.toContain("popovertarget");
+    expect(library).toMatch(/<fieldset[^>]*id="tier-options"|id="tier-options"[^>]*class="tier-filter"/);
+    expect(library).toMatch(/value="tbr"[^>]*checked|checked[^>]*value="tbr"/);
   });
 
   it("uses a manual popover for undo and a single live region", () => {
@@ -48,7 +51,37 @@ describe("theme and a11y CSS", () => {
     expect(css).toContain("accent-color:");
   });
 
+  it("keeps raised surfaces lighter than tracks in both schemes", () => {
+    const surface = lightDarkPair(css, "--surface");
+    const track = lightDarkPair(css, "--track");
+
+    expect(relativeLuminance(surface.light)).toBeGreaterThan(relativeLuminance(track.light));
+    expect(relativeLuminance(surface.dark)).toBeGreaterThan(relativeLuminance(track.dark));
+  });
+
+  it("does not enclose the tier filter in a surface box", () => {
+    expect(css).not.toMatch(/\.tier-filter\s*\{[^}]*\bborder:/);
+    expect(css).not.toMatch(/\.tier-filter\s*\{[^}]*\bborder-radius:/);
+    expect(css).not.toMatch(/\.tier-filter\s*\{[^}]*\bbackground:/);
+  });
+
   it("reveals sr-only controls when they receive focus", () => {
     expect(css).toMatch(/\.sr-only:where\(:not\(:focus-within,\s*:active\)\)/);
   });
 });
+
+function lightDarkPair(source: string, token: string) {
+  const match = source.match(new RegExp(`${token}:\\s*light-dark\\((#[0-9a-fA-F]+),\\s*(#[0-9a-fA-F]+)\\)`));
+  expect(match, `${token} light-dark pair`).toBeTruthy();
+  return { light: match![1], dark: match![2] };
+}
+
+function relativeLuminance(hex: string) {
+  const digits = hex.slice(1);
+  const rgb = digits.length === 3 ? [...digits].map((digit) => digit + digit).join("") : digits;
+  const [r, g, b] = [0, 2, 4].map((index) => {
+    const channel = parseInt(rgb.slice(index, index + 2), 16) / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
