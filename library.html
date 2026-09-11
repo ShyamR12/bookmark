@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Bookmarkit Library</title>
   </head>
   <body class="library-page">
@@ -17,9 +18,11 @@
           <span class="sr-only">Search title or URL</span>
           <input id="search-input" type="search" placeholder="Search by title or URL" autocomplete="off" />
         </label>
-        <details id="rank-filter" class="filter-control">
-          <summary><span id="rank-filter-label">TBR</span></summary>
-          <div class="rank-options" aria-label="Filter by rank">
+        <div class="filter-control">
+          <button type="button" id="rank-filter-button" class="filter-button" popovertarget="rank-options">
+            <span id="rank-filter-label">TBR</span>
+          </button>
+          <div id="rank-options" class="rank-options" popover="auto" aria-label="Filter by rank">
             <label><input id="all-ranks" type="checkbox" /> All ranks</label>
             <label><input type="checkbox" value="tbr-candidate" /> TBR?</label>
             <label><input type="checkbox" value="tbr" checked /> TBR</label>
@@ -27,7 +30,7 @@
             <label><input type="checkbox" value="a" /> A</label>
             <label><input type="checkbox" value="b" /> B</label>
           </div>
-        </details>
+        </div>
       </section>
 
       <section class="library-grid" aria-label="Saved bookmarks">
@@ -49,7 +52,7 @@
         <p id="empty-state" class="empty-state" hidden></p>
       </section>
 
-      <div id="undo-toast" class="undo-toast" role="status" aria-live="polite" hidden>
+      <div id="undo-toast" class="undo-toast" popover="manual">
         <span>Bookmark deleted.</span>
         <button id="undo-button" type="button">Undo</button>
       </div>

@@ -1,11 +1,12 @@
 import "./styles.css";
 import { db, RANK_LABELS, RANKS, type Bookmark, type Rank } from "./database";
 import { emptyMessage, visibleBookmarks } from "./library-query";
+import { hideManualPopover, showManualPopover } from "./popover";
 import { rankFilterLabel, syncRankSelection } from "./rank-filter";
 
 const rows = document.querySelector<HTMLTableSectionElement>("#bookmark-rows")!;
 const searchInput = document.querySelector<HTMLInputElement>("#search-input")!;
-const rankFilter = document.querySelector<HTMLDetailsElement>("#rank-filter")!;
+const rankFilter = document.querySelector<HTMLElement>("#rank-options")!;
 const rankFilterLabelEl = document.querySelector<HTMLElement>("#rank-filter-label")!;
 const allRanks = document.querySelector<HTMLInputElement>("#all-ranks")!;
 const rankCheckboxes = [...rankFilter.querySelectorAll<HTMLInputElement>("input[value]")];
@@ -88,11 +89,11 @@ async function updateRank(select: HTMLSelectElement | null) {
 
 function showUndo(bookmark: Bookmark) {
   deletedBookmark = bookmark;
-  undoToast.hidden = false;
+  showManualPopover(undoToast);
   if (undoTimer) window.clearTimeout(undoTimer);
   undoTimer = window.setTimeout(() => {
     deletedBookmark = undefined;
-    undoToast.hidden = true;
+    hideManualPopover(undoToast);
   }, 5000);
 }
 
@@ -122,7 +123,7 @@ async function undoDelete() {
     await db.bookmarks.put(deletedBookmark);
     setStatus("Bookmark restored.");
     deletedBookmark = undefined;
-    undoToast.hidden = true;
+    hideManualPopover(undoToast);
     if (undoTimer) window.clearTimeout(undoTimer);
     await render();
   } catch {
@@ -142,10 +143,6 @@ function onRankFilterChange(event: Event) {
   render();
 }
 
-function closeRankFilter(event: PointerEvent) {
-  if (rankFilter.open && !rankFilter.contains(event.target as Node)) rankFilter.open = false;
-}
-
 function toggleDateSort() {
   newestFirst = !newestFirst;
   render();
@@ -153,7 +150,6 @@ function toggleDateSort() {
 
 searchInput.addEventListener("input", render);
 rankFilter.addEventListener("change", onRankFilterChange);
-document.addEventListener("pointerdown", closeRankFilter);
 dateSort.addEventListener("click", toggleDateSort);
 rows.addEventListener("change", (event) => updateRank(actionElement(event, "change-rank")));
 rows.addEventListener("click", (event) => deleteBookmark(actionElement(event, "delete")));
