@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createExport, parseImport } from "./import-export";
+import { createExport, mergeAdditions, parseImport } from "./import-export";
 
 const bookmark = {
   url: "https://example.com/a?utm_source=x",
@@ -48,3 +48,12 @@ describe("parseImport", () => {
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, time: "soon" }] }))).toThrow("invalid stored time");
   });
 });
+
+describe("mergeAdditions", () => {
+  it("inserts only URLs that are not already stored", () => {
+    const extra = { ...bookmark, url: "https://example.com/b", normalizedUrl: "https://example.com/b", title: "Other" };
+    expect(mergeAdditions([bookmark, extra], [bookmark.normalizedUrl])).toEqual([extra]);
+    expect(mergeAdditions([bookmark], [bookmark.normalizedUrl])).toEqual([]);
+  });
+});
+

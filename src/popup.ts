@@ -1,9 +1,10 @@
 import "./styles.css";
 import { db, type Bookmark, type Rank } from "./database";
 import { feedbackUrl } from "./feedback";
-import { createExport, parseImport } from "./import-export";
+import { createExport, mergeAdditions, parseImport } from "./import-export";
 import { normalizeUrl, pageTitle } from "./url";
 
+const captureRow = document.querySelector<HTMLElement>("#capture-row")!;
 const bookmarkButton = document.querySelector<HTMLButtonElement>("#bookmark-button")!;
 const existingPanel = document.querySelector<HTMLElement>("#existing-panel")!;
 const rankSelect = document.querySelector<HTMLSelectElement>("#rank-select")!;
@@ -13,18 +14,29 @@ const randomButton = document.querySelector<HTMLButtonElement>("#random-button")
 const latestButton = document.querySelector<HTMLButtonElement>("#latest-button")!;
 const importButton = document.querySelector<HTMLButtonElement>("#import-button")!;
 const exportButton = document.querySelector<HTMLButtonElement>("#export-button")!;
-const importDialog = document.querySelector<HTMLDialogElement>("#import-dialog")!;
 const importFile = document.querySelector<HTMLInputElement>("#import-file")!;
-const chooseImportFile = document.querySelector<HTMLButtonElement>("#choose-import-file")!;
 const feedbackLink = document.querySelector<HTMLAnchorElement>("#feedback-link")!;
-const shell = document.querySelector<HTMLElement>(".popup-shell")!;
 let activeBookmark: Bookmark | undefined;
 let activeTab: chrome.tabs.Tab | undefined;
-let pendingImportMode: "merge" | "replace" = "merge";
 
 function setStatus(message: string, error = false) {
   status.textContent = message;
   status.classList.toggle("error", error);
+}
+
+function counted(prefix: string, count: number) {
+  return `${prefix} ${count} bookmark${count === 1 ? "" : "s"}.`;
+}
+
+async function withBusy(control: HTMLButtonElement, work: () => Promise<void>, fail: string) {
+  control.disabled = true;
+  try {
+    await work();
+  } catch {
+    setStatus(fail, true);
+  } finally {
+    control.disabled = false;
+  }
 }
 
 function currentRank(): Rank {
@@ -34,8 +46,7 @@ function currentRank(): Rank {
 function showExisting(bookmark: Bookmark | undefined) {
   activeBookmark = bookmark;
   existingPanel.hidden = !bookmark;
-  bookmarkButton.hidden = Boolean(bookmark);
-  shell.classList.toggle("is-existing", Boolean(bookmark));
+  captureRow.hidden = Boolean(bookmark);
   if (bookmark) rankSelect.value = bookmark.rank;
 }
 
@@ -46,11 +57,12 @@ async function findCurrentBookmark() {
 }
 
 async function capture() {
-  if (!activeTab?.url) return setStatus("This page cannot be saved.", true);
-  const normalizedUrl = normalizeUrl(activeTab.url);
+  const tab = activeTab;
+  const pageUrl = tab?.url;
+  if (!tab || !pageUrl) return setStatus("This page cannot be saved.", true);
+  const normalizedUrl = normalizeUrl(pageUrl);
   if (!normalizedUrl) return setStatus("Only standard web pages can be saved.", true);
-  bookmarkButton.disabled = true;
-  try {
+  await withBusy(bookmarkButton, async () => {
     const existing = await db.bookmarks.where("normalizedUrl").equals(normalizedUrl).first();
     if (existing) {
       showExisting(existing);
@@ -58,19 +70,15 @@ async function capture() {
       return;
     }
     await db.bookmarks.add({
-      url: activeTab.url,
+      url: pageUrl,
       normalizedUrl,
-      title: pageTitle(activeTab.title ?? "", activeTab.url),
+      title: pageTitle(tab.title ?? "", pageUrl),
       rank: currentRank(),
       time: new Date().toISOString()
     });
     setStatus("Saved to your reading list.");
     window.setTimeout(() => window.close(), 550);
-  } catch {
-    setStatus("Couldn’t save this bookmark. Please try again.", true);
-  } finally {
-    bookmarkButton.disabled = false;
-  }
+  }, "Couldn’t save this bookmark. Please try again.");
 }
 
 async function changeRank() {
@@ -91,17 +99,13 @@ async function changeRank() {
 }
 
 async function deleteBookmark() {
-  if (!activeBookmark?.id) return;
-  deleteButton.disabled = true;
-  try {
-    await db.bookmarks.delete(activeBookmark.id);
+  const id = activeBookmark?.id;
+  if (!id) return;
+  await withBusy(deleteButton, async () => {
+    await db.bookmarks.delete(id);
     showExisting(undefined);
     setStatus("Bookmark deleted.");
-  } catch {
-    setStatus("Couldn’t delete this bookmark. Please try again.", true);
-  } finally {
-    deleteButton.disabled = false;
-  }
+  }, "Couldn’t delete this bookmark. Please try again.");
 }
 
 async function readingList() {
@@ -110,21 +114,15 @@ async function readingList() {
 }
 
 async function openFromList(button: HTMLButtonElement, pick: (bookmarks: Bookmark[]) => Bookmark) {
-  button.disabled = true;
-  try {
+  await withBusy(button, async () => {
     const bookmarks = await readingList();
     if (bookmarks.length === 0) return setStatus("Your reading list is empty");
     await chrome.tabs.create({ url: pick(bookmarks).url });
-  } catch {
-    setStatus("Couldn’t open this bookmark. Please try again.", true);
-  } finally {
-    button.disabled = false;
-  }
+  }, "Couldn’t open this bookmark. Please try again.");
 }
 
 async function exportBookmarks() {
-  exportButton.disabled = true;
-  try {
+  await withBusy(exportButton, async () => {
     const exportDocument = createExport(await db.bookmarks.toArray());
     const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(exportDocument, null, 2)], { type: "application/json;charset=utf-8" }));
     const download = document.createElement("a");
@@ -132,25 +130,15 @@ async function exportBookmarks() {
     download.download = `bookmarkit-${exportDocument.exportedAt.slice(0, 10)}.json`;
     download.click();
     window.setTimeout(() => URL.revokeObjectURL(blobUrl), 0);
-    setStatus(`Exported ${exportDocument.bookmarks.length} bookmark${exportDocument.bookmarks.length === 1 ? "" : "s"}.`);
-  } catch {
-    setStatus("Couldn’t export your bookmarks. Please try again.", true);
-  } finally {
-    exportButton.disabled = false;
-  }
+    setStatus(counted("Exported", exportDocument.bookmarks.length));
+  }, "Couldn’t export your bookmarks. Please try again.");
 }
 
-async function applyImport(bookmarks: Bookmark[], mode: "merge" | "replace"): Promise<number> {
+async function applyImport(bookmarks: Bookmark[]): Promise<number> {
   return db.transaction("rw", db.bookmarks, async () => {
-    if (mode === "replace") {
-      await db.bookmarks.clear();
-      if (bookmarks.length > 0) await db.bookmarks.bulkAdd(bookmarks);
-      return bookmarks.length;
-    }
     if (bookmarks.length === 0) return 0;
     const existing = await db.bookmarks.where("normalizedUrl").anyOf(bookmarks.map((bookmark) => bookmark.normalizedUrl)).toArray();
-    const have = new Set(existing.map((bookmark) => bookmark.normalizedUrl));
-    const additions = bookmarks.filter((bookmark) => !have.has(bookmark.normalizedUrl));
+    const additions = mergeAdditions(bookmarks, existing.map((bookmark) => bookmark.normalizedUrl));
     if (additions.length > 0) await db.bookmarks.bulkAdd(additions);
     return additions.length;
   });
@@ -160,12 +148,9 @@ async function importBookmarks() {
   const file = importFile.files?.[0];
   if (!file) return;
   importButton.disabled = true;
-  chooseImportFile.disabled = true;
-  importDialog.close();
   try {
-    const importedCount = await applyImport(parseImport(await file.text()), pendingImportMode);
-    const action = pendingImportMode === "replace" ? "Imported" : "Added";
-    setStatus(`${action} ${importedCount} bookmark${importedCount === 1 ? "" : "s"}.`);
+    const importedCount = await applyImport(parseImport(await file.text()));
+    setStatus(counted("Added", importedCount));
     await findCurrentBookmark();
   } catch (error) {
     const message = error instanceof Error ? error.message : "The selected file could not be imported.";
@@ -173,7 +158,6 @@ async function importBookmarks() {
   } finally {
     importFile.value = "";
     importButton.disabled = false;
-    chooseImportFile.disabled = false;
   }
 }
 
@@ -189,14 +173,8 @@ randomButton.addEventListener("click", () => {
 latestButton.addEventListener("click", () => {
   void openFromList(latestButton, (bookmarks) => bookmarks.sort((first, second) => second.time.localeCompare(first.time))[0]);
 });
-importButton.addEventListener("click", () => {
-  if (!importDialog.open) importDialog.showModal();
-});
+importButton.addEventListener("click", () => importFile.click());
 exportButton.addEventListener("click", () => void exportBookmarks());
-chooseImportFile.addEventListener("click", () => {
-  pendingImportMode = document.querySelector<HTMLInputElement>('input[name="import-mode"]:checked')!.value as "merge" | "replace";
-  importFile.click();
-});
 importFile.addEventListener("change", () => void importBookmarks());
 feedbackLink.href = feedbackUrl(chrome.runtime.getManifest().version);
 feedbackLink.addEventListener("click", (event) => {

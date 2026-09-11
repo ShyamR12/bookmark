@@ -1,6 +1,7 @@
 import "./styles.css";
 import { db, RANK_LABELS, RANKS, type Bookmark, type Rank } from "./database";
-import { rankFilterLabel, selectedRanks } from "./rank-filter";
+import { emptyMessage, visibleBookmarks } from "./library-query";
+import { rankFilterLabel } from "./rank-filter";
 
 const rows = document.querySelector<HTMLTableSectionElement>("#bookmark-rows")!;
 const searchInput = document.querySelector<HTMLInputElement>("#search-input")!;
@@ -27,11 +28,15 @@ function escapeHtml(value: string) {
 }
 
 function checkedRanks(): Rank[] {
-  return selectedRanks(allRanks.checked, rankCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value as Rank));
+  return rankCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value as Rank);
 }
 
 function updateFilterLabel() {
-  rankFilterLabelEl.textContent = rankFilterLabel(allRanks.checked, checkedRanks());
+  rankFilterLabelEl.textContent = rankFilterLabel(checkedRanks());
+}
+
+function rowId(from: HTMLElement) {
+  return Number(from.closest("tr")?.dataset.id);
 }
 
 function rowTemplate(bookmark: Bookmark) {
@@ -48,23 +53,14 @@ function rowTemplate(bookmark: Bookmark) {
   return row;
 }
 
-function emptyMessage(query: string, filters: Rank[]) {
-  if (query) return "No bookmarks match your search.";
-  if (filters.length === 1) return `No ${RANK_LABELS[filters[0]]} bookmarks yet.`;
-  if (filters.length === 0) return "Select a rank to show bookmarks.";
-  return "No bookmarks yet.";
-}
-
 async function render() {
   try {
-    const query = searchInput.value.trim().toLocaleLowerCase();
-    const filters = new Set(checkedRanks());
-    const bookmarks = (await db.bookmarks.toArray())
-      .filter((bookmark) => filters.has(bookmark.rank) && (!query || bookmark.title.toLocaleLowerCase().includes(query) || bookmark.url.toLocaleLowerCase().includes(query)))
-      .sort((first, second) => newestFirst ? second.time.localeCompare(first.time) : first.time.localeCompare(second.time));
+    const query = searchInput.value;
+    const filters = checkedRanks();
+    const bookmarks = visibleBookmarks(await db.bookmarks.toArray(), query, filters, newestFirst);
     rows.replaceChildren(...bookmarks.map(rowTemplate));
     emptyState.hidden = bookmarks.length > 0;
-    emptyState.textContent = emptyMessage(query, [...filters]);
+    emptyState.textContent = emptyMessage(query, filters);
     dateSort.querySelector("span")!.textContent = newestFirst ? "↓" : "↑";
     dateSort.closest("th")?.setAttribute("aria-sort", newestFirst ? "descending" : "ascending");
   } catch {
@@ -73,7 +69,7 @@ async function render() {
 }
 
 async function updateRank(select: HTMLSelectElement) {
-  const id = Number(select.closest("tr")?.dataset.id);
+  const id = rowId(select);
   if (!Number.isInteger(id)) return;
   select.disabled = true;
   try {
@@ -100,7 +96,7 @@ function showUndo(bookmark: Bookmark) {
 }
 
 async function deleteBookmark(button: HTMLButtonElement) {
-  const id = Number(button.closest("tr")?.dataset.id);
+  const id = rowId(button);
   if (!Number.isInteger(id)) return;
   button.disabled = true;
   try {

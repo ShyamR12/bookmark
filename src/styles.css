@@ -20,7 +20,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .rank-editor select { width: 100%; min-height: 42px; appearance: none; border: 2px solid var(--ink); border-radius: var(--control-radius); background: white; padding: 5px 42px 5px 12px; color: var(--ink); font-size: 17px; font-weight: 750; }
 .text-button { min-height: 42px; border: 0; border-bottom: 1px solid currentColor; padding: 2px 0; background: transparent; font-weight: 700; }
 .danger { color: #9c2921; }
-.popup-shell.is-existing .capture-row { display: none; }
+.capture-row[hidden] { display: none; }
 .status { min-height: 18px; margin: -4px 0 0; text-align: center; color: #2b6e40; font-size: 12px; font-weight: 650; }
 .status.error { color: #a42a23; }
 .actions { display: grid; justify-items: center; align-content: center; gap: 18px; flex: 1; min-height: 190px; }
@@ -30,16 +30,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .footer-right { display: flex; gap: 18px; }
 .footer-link { border: 0; border-bottom: 1px solid #252525; padding: 0 0 2px; color: #252525; background: transparent; font-weight: 700; font-size: 13px; text-decoration: none; }
 .footer-link:hover { color: #59554f; }
-.import-dialog { width: calc(100% - 28px); max-width: 430px; border: 2px solid var(--ink); border-radius: 16px; padding: 20px; color: var(--ink); background: #fff; }
-.import-dialog::backdrop { background: rgb(0 0 0 / 35%); }
-.import-dialog h2 { margin: 0 0 16px; font-size: 20px; }
-.import-dialog fieldset { display: grid; gap: 12px; margin: 0; padding: 0; border: 0; }
-.import-dialog legend { margin-bottom: 10px; font-size: 14px; font-weight: 750; }
-.import-dialog label { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.4; cursor: pointer; }
-.import-dialog input { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--ink); }
-.import-dialog input[value="replace"] + span { color: #8c251e; }
-.dialog-actions { display: flex; align-items: center; justify-content: end; gap: 18px; margin-top: 22px; }
-.dialog-primary { min-height: 38px; border: 2px solid var(--ink); border-radius: var(--control-radius); padding: 5px 13px; color: #fff; background: var(--ink); font-weight: 750; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 .library-page { min-width: 0; min-height: 100vh; padding: clamp(20px, 5vw, 72px); }
 .library-shell { position: relative; width: min(100%, 1120px); min-height: calc(100vh - clamp(40px, 10vw, 144px)); margin: 0 auto; border: 2px solid var(--ink); border-radius: 26px; background: #fff; padding: clamp(24px, 4vw, 54px); }

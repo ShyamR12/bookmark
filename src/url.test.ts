@@ -4,6 +4,7 @@ import { normalizeUrl, pageTitle } from "./url";
 describe("normalizeUrl", () => {
   it("lowercases the host, drops the fragment, and default ports", () => {
     expect(normalizeUrl("HTTPS://News.Example.COM:443/a#section")).toBe("https://news.example.com/a");
+    expect(normalizeUrl("HTTP://Example.COM:80/a")).toBe("http://example.com/a");
   });
 
   it("strips tracking parameters and sorts the rest", () => {
