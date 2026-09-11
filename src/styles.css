@@ -10,6 +10,8 @@
     --accent: light-dark(#4c77f2, #7b9cff);
     --row-hover: light-dark(#eceae4, #2f2d2a);
     --track: light-dark(#ebe7e0, #2a2825);
+    --control-line: light-dark(#d5d3cc, #5a5752);
+    --control-ink: light-dark(#1a1a1a, #f2f0ea);
     --radius: 10px;
     --radius-inner: 6px;
     accent-color: var(--accent);
@@ -207,12 +209,19 @@ button {
 }
 
 .search-control input {
-    border: 2px solid currentColor;
+    border: 1px solid var(--control-line);
     border-radius: var(--radius);
     background: var(--surface);
     color: inherit;
     font-weight: 700;
-    padding: 8px 12px;
+    padding-block: 8px;
+    padding-inline: 38px 12px;
+
+    &:focus-visible {
+        border-width: 1.5px;
+        border-color: var(--control-ink);
+        outline: none;
+    }
 }
 
 .status,
@@ -290,10 +299,21 @@ button {
 }
 
 .search-control {
+    display: grid;
     width: min(100%, 360px);
+
+    svg {
+        grid-area: 1 / 1;
+        z-index: 1;
+        place-self: center start;
+        margin-inline-start: 12px;
+        pointer-events: none;
+        color: var(--muted);
+    }
 }
 
 .search-control input {
+    grid-area: 1 / 1;
     width: 100%;
 }
 
@@ -304,10 +324,11 @@ button {
     min-inline-size: 0;
     column-gap: 16px;
     row-gap: 8px;
+    accent-color: var(--control-ink);
 
     button {
         position: relative;
-        color: var(--accent);
+        color: var(--control-ink);
         font-weight: 700;
         padding-inline-end: 14px;
         white-space: nowrap;

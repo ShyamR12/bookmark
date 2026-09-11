@@ -16,6 +16,11 @@ describe("popup markup", () => {
 });
 
 describe("library markup", () => {
+  it("puts a decorative search icon in the library search field", () => {
+    expect(library).toMatch(/class="search-control"[\s\S]*<svg[^>]*aria-hidden="true"[\s\S]*d="m21 21-5\.197-5\.197/);
+    expect(library).not.toContain('class="size-6"');
+  });
+
   it("uses an inline multi-select tier filter", () => {
     expect(library).toContain('id="select-all-tiers"');
     expect(library).toContain("Select all");
@@ -57,6 +62,15 @@ describe("theme and a11y CSS", () => {
 
     expect(relativeLuminance(surface.light)).toBeGreaterThan(relativeLuminance(track.light));
     expect(relativeLuminance(surface.dark)).toBeGreaterThan(relativeLuminance(track.dark));
+  });
+
+  it("softens the search border and uses monochrome filter accents", () => {
+    expect(css).toMatch(/--control-line:\s*light-dark\(#d5d3cc/i);
+    expect(css).toMatch(/--control-ink:\s*light-dark\(#1a1a1a/i);
+    expect(css).toMatch(/\.search-control input[\s\S]*?border:\s*1px solid var\(--control-line\)/);
+    expect(css).toMatch(/\.search-control input[\s\S]*?:focus-visible/);
+    expect(css).toMatch(/\.tier-filter\s*\{[\s\S]*?accent-color:\s*var\(--control-ink\)/);
+    expect(css).toMatch(/\.tier-filter[\s\S]*?button\s*\{[\s\S]*?color:\s*var\(--control-ink\)/);
   });
 
   it("does not enclose the tier filter in a surface box", () => {
