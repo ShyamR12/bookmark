@@ -8,52 +8,52 @@
   </head>
   <body>
     <main class="popup-shell">
-      <h1 class="sr-only">Bookmarkit</h1>
-      <header id="capture-row" class="capture-row" aria-label="Save current page">
-        <fieldset class="rank-radios">
-          <legend class="sr-only">Initial rank</legend>
-          <label><input type="radio" name="rank" value="tbr-candidate" checked /> <span>TBR?</span></label>
-          <label><input type="radio" name="rank" value="tbr" /> <span>TBR</span></label>
-        </fieldset>
-        <button id="bookmark-button" class="bookmark-button" type="button">Bookmarkit</button>
-      </header>
-
-      <section id="existing-panel" class="existing-panel" hidden aria-labelledby="existing-heading">
-        <p id="existing-heading" class="eyebrow">Already in library</p>
-        <div class="rank-editor">
-          <label class="sr-only" for="rank-select">Current rank</label>
-          <div class="select-wrap">
-            <select id="rank-select">
-              <option value="tbr-candidate">TBR?</option>
-              <option value="tbr">TBR</option>
-              <option value="s">S</option>
-              <option value="a">A</option>
-              <option value="b">B</option>
-            </select>
-          </div>
-          <button id="delete-button" class="table-delete" type="button" aria-label="Delete">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <p id="status" class="status" role="status" aria-live="polite"></p>
-
-      <nav class="actions" aria-label="Bookmark actions">
-        <button id="random-button" class="primary-action" type="button">Open Random Bookmark</button>
-        <button id="latest-button" class="primary-action" type="button">Open Latest Bookmark</button>
-        <button id="library-button" class="primary-action library-action" type="button">Open Library</button>
+      <nav class="popup-nav" aria-label="Bookmark actions">
+        <button id="random-button" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+            <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" />
+            <path d="M12 22V12" />
+            <path d="M2 7l10 5 10-5" />
+            <circle cx="12" cy="7" r="1" fill="currentColor" />
+            <circle cx="7" cy="12" r="1" fill="currentColor" />
+            <circle cx="7" cy="17" r="1" fill="currentColor" />
+            <circle cx="17" cy="12" r="1" fill="currentColor" />
+            <circle cx="17" cy="17" r="1" fill="currentColor" />
+          </svg>
+          Random
+        </button>
+        <button id="latest-button" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          Latest
+        </button>
+        <button id="library-button" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
+          Library
+        </button>
       </nav>
 
-      <footer class="footer">
-        <a id="feedback-link" class="footer-link" href="#" target="_blank" rel="noreferrer">Share feedback</a>
-        <div class="footer-right">
-          <button id="import-button" class="footer-link" type="button">Import</button>
-          <button id="export-button" class="footer-link" type="button">Export</button>
-        </div>
-      </footer>
+      <section class="page-meta">
+        <h1 id="page-title">This page</h1>
+        <p id="page-host" class="page-host"></p>
+      </section>
 
-      <input id="import-file" class="sr-only" type="file" accept="application/json,.json" aria-label="Import bookmarks JSON" />
+      <fieldset class="rank-pills">
+        <legend class="sr-only">Rank</legend>
+        <label><input type="radio" name="rank" value="tbr-candidate" checked /> TBR?</label>
+        <label><input type="radio" name="rank" value="tbr" /> TBR</label>
+        <label class="finished-rank" hidden><input type="radio" name="rank" value="s" /> S</label>
+        <label class="finished-rank" hidden><input type="radio" name="rank" value="a" /> A</label>
+        <label class="finished-rank" hidden><input type="radio" name="rank" value="b" /> B</label>
+      </fieldset>
+
+      <button id="bookmark-button" class="bookmark-button" type="button">Bookmarkit</button>
+      <button id="delete-button" class="remove-button" type="button" hidden>Remove bookmark</button>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
     </main>
     <script type="module" src="/src/popup.ts"></script>
   </body>
