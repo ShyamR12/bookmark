@@ -24,9 +24,7 @@ class BookmarkDatabase extends Dexie {
 
   constructor() {
     super("bookmarkit");
-    this.version(1).stores({ bookmarks: "++id,&normalizedUrl,rank,time" });
-    this.version(2).stores({ bookmarks: "++id,&normalizedUrl,rank,time", settings: "&key" });
-    this.version(3).stores({ bookmarks: "++id,&normalizedUrl,rank,time", settings: null });
+    this.version(3).stores({ bookmarks: "++id,&normalizedUrl,rank,time" });
   }
 }
 

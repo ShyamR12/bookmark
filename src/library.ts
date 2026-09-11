@@ -1,7 +1,7 @@
 import "./styles.css";
 import { db, RANK_LABELS, RANKS, type Bookmark, type Rank } from "./database";
 import { emptyMessage, visibleBookmarks } from "./library-query";
-import { rankFilterLabel } from "./rank-filter";
+import { rankFilterLabel, syncRankSelection } from "./rank-filter";
 
 const rows = document.querySelector<HTMLTableSectionElement>("#bookmark-rows")!;
 const searchInput = document.querySelector<HTMLInputElement>("#search-input")!;
@@ -68,7 +68,8 @@ async function render() {
   }
 }
 
-async function updateRank(select: HTMLSelectElement) {
+async function updateRank(select: HTMLSelectElement | null) {
+  if (!select) return;
   const id = rowId(select);
   if (!Number.isInteger(id)) return;
   select.disabled = true;
@@ -95,7 +96,8 @@ function showUndo(bookmark: Bookmark) {
   }, 5000);
 }
 
-async function deleteBookmark(button: HTMLButtonElement) {
+async function deleteBookmark(button: HTMLButtonElement | null) {
+  if (!button) return;
   const id = rowId(button);
   if (!Number.isInteger(id)) return;
   button.disabled = true;
@@ -130,29 +132,31 @@ async function undoDelete() {
   }
 }
 
-searchInput.addEventListener("input", () => void render());
-rankFilter.addEventListener("change", (event) => {
-  const checkbox = event.target as HTMLInputElement;
-  if (checkbox === allRanks) rankCheckboxes.forEach((option) => { option.checked = allRanks.checked; });
-  else allRanks.checked = rankCheckboxes.every((option) => option.checked);
+function actionElement<T extends HTMLElement>(event: Event, action: string) {
+  return (event.target as HTMLElement).closest<T>(`[data-action="${action}"]`);
+}
+
+function onRankFilterChange(event: Event) {
+  syncRankSelection(event.target as HTMLInputElement, allRanks, rankCheckboxes);
   updateFilterLabel();
-  void render();
-});
-document.addEventListener("pointerdown", (event) => {
+  render();
+}
+
+function closeRankFilter(event: PointerEvent) {
   if (rankFilter.open && !rankFilter.contains(event.target as Node)) rankFilter.open = false;
-});
-dateSort.addEventListener("click", () => {
+}
+
+function toggleDateSort() {
   newestFirst = !newestFirst;
-  void render();
-});
-rows.addEventListener("change", (event) => {
-  const select = (event.target as HTMLElement).closest<HTMLSelectElement>("[data-action='change-rank']");
-  if (select) void updateRank(select);
-});
-rows.addEventListener("click", (event) => {
-  const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-action='delete']");
-  if (button) void deleteBookmark(button);
-});
-undoButton.addEventListener("click", () => void undoDelete());
+  render();
+}
+
+searchInput.addEventListener("input", render);
+rankFilter.addEventListener("change", onRankFilterChange);
+document.addEventListener("pointerdown", closeRankFilter);
+dateSort.addEventListener("click", toggleDateSort);
+rows.addEventListener("change", (event) => updateRank(actionElement(event, "change-rank")));
+rows.addEventListener("click", (event) => deleteBookmark(actionElement(event, "delete")));
+undoButton.addEventListener("click", undoDelete);
 updateFilterLabel();
-void render();
+render();

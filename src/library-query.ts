@@ -1,15 +1,15 @@
 import { RANK_LABELS, type Bookmark, type Rank } from "./database";
 
 export function visibleBookmarks(bookmarks: Bookmark[], query: string, ranks: Rank[], newestFirst: boolean): Bookmark[] {
-  const needle = query.trim().toLocaleLowerCase();
+  const search = query.trim().toLocaleLowerCase();
   const allowed = new Set(ranks);
   return bookmarks
-    .filter((bookmark) => allowed.has(bookmark.rank) && matchesQuery(bookmark, needle))
+    .filter((bookmark) => allowed.has(bookmark.rank) && matchesQuery(bookmark, search))
     .sort((first, second) => (newestFirst ? second.time.localeCompare(first.time) : first.time.localeCompare(second.time)));
 }
 
-function matchesQuery(bookmark: Bookmark, needle: string) {
-  return !needle || bookmark.title.toLocaleLowerCase().includes(needle) || bookmark.url.toLocaleLowerCase().includes(needle);
+function matchesQuery(bookmark: Bookmark, search: string) {
+  return !search || bookmark.title.toLocaleLowerCase().includes(search) || bookmark.url.toLocaleLowerCase().includes(search);
 }
 
 export function emptyMessage(query: string, filters: Rank[]): string {

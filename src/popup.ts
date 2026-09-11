@@ -161,25 +161,25 @@ async function importBookmarks() {
   }
 }
 
-bookmarkButton.addEventListener("click", () => void capture());
-rankSelect.addEventListener("change", () => void changeRank());
-deleteButton.addEventListener("click", () => void deleteBookmark());
+bookmarkButton.addEventListener("click", capture);
+rankSelect.addEventListener("change", changeRank);
+deleteButton.addEventListener("click", deleteBookmark);
 document.querySelector<HTMLButtonElement>("#library-button")!.addEventListener("click", () => {
-  void chrome.tabs.create({ url: chrome.runtime.getURL("library.html") });
+  chrome.tabs.create({ url: chrome.runtime.getURL("library.html") });
 });
 randomButton.addEventListener("click", () => {
-  void openFromList(randomButton, (bookmarks) => bookmarks[Math.floor(Math.random() * bookmarks.length)]);
+  openFromList(randomButton, (bookmarks) => bookmarks[Math.floor(Math.random() * bookmarks.length)]);
 });
 latestButton.addEventListener("click", () => {
-  void openFromList(latestButton, (bookmarks) => bookmarks.sort((first, second) => second.time.localeCompare(first.time))[0]);
+  openFromList(latestButton, (bookmarks) => bookmarks.sort((first, second) => second.time.localeCompare(first.time))[0]);
 });
 importButton.addEventListener("click", () => importFile.click());
-exportButton.addEventListener("click", () => void exportBookmarks());
-importFile.addEventListener("change", () => void importBookmarks());
+exportButton.addEventListener("click", exportBookmarks);
+importFile.addEventListener("change", importBookmarks);
 feedbackLink.href = feedbackUrl(chrome.runtime.getManifest().version);
 feedbackLink.addEventListener("click", (event) => {
   event.preventDefault();
-  void chrome.tabs.create({ url: feedbackLink.href });
+  chrome.tabs.create({ url: feedbackLink.href });
 });
 
 async function initialize() {
@@ -191,4 +191,4 @@ async function initialize() {
   }
 }
 
-void initialize();
+initialize();
