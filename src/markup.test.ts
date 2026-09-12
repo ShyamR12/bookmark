@@ -75,6 +75,8 @@ describe("theme and a11y CSS", () => {
     expect(css).toMatch(/--control-ink:\s*light-dark\(#1a1a1a/i);
     expect(css).toMatch(/\.search-control input[\s\S]*?border:\s*1px solid var\(--control-line\)/);
     expect(css).toMatch(/\.search-control input[\s\S]*?:focus-visible/);
+    expect(css).toMatch(/\.search-control input[\s\S]*?&::placeholder[\s\S]*?opacity:\s*1/);
+    expect(css).toMatch(/\.search-control input[\s\S]*?&::placeholder[\s\S]*?color:\s*light-dark\(/);
     expect(css).toMatch(/\.tier-filter\s*\{[\s\S]*?accent-color:\s*var\(--control-ink\)/);
     expect(css).toMatch(/\.tier-filter[\s\S]*?button\s*\{[\s\S]*?color:\s*var\(--control-ink\)/);
   });

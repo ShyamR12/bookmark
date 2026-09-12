@@ -232,6 +232,11 @@ button {
         border-color: var(--control-ink);
         outline: none;
     }
+
+    &::placeholder {
+        color: light-dark(#5c5854, #cfcbc4);
+        opacity: 1;
+    }
 }
 
 .status,
@@ -318,7 +323,7 @@ button {
         place-self: center start;
         margin-inline-start: 12px;
         pointer-events: none;
-        color: var(--muted);
+        color: light-dark(#5c5854, #cfcbc4);
     }
 }
 
