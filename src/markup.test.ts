@@ -82,6 +82,15 @@ describe("theme and a11y CSS", () => {
   it("reveals sr-only controls when they receive focus", () => {
     expect(css).toMatch(/\.sr-only:where\(:not\(:focus-within,\s*:active\)\)/);
   });
+
+  it("uses muted status text and ink errors without green or red", () => {
+    expect(css).not.toMatch(/--ok:/);
+    expect(css).not.toMatch(/--danger:/);
+    expect(css).toMatch(/\.status,\s*\.library-status\s*\{[\s\S]*?color:\s*var\(--muted\)/);
+    expect(css).toMatch(/&\.error\s*\{[\s\S]*?color:\s*var\(--ink\)/);
+    expect(css).toMatch(/\.remove-button\s*\{[\s\S]*?color:\s*var\(--muted\)/);
+    expect(css).toMatch(/\.remove-button[\s\S]*?:hover[\s\S]*?color:\s*var\(--ink\)/);
+  });
 });
 
 function lightDarkPair(source: string, token: string) {

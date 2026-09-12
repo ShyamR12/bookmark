@@ -34,9 +34,15 @@ describe("visibleBookmarks", () => {
 
 describe("emptyMessage", () => {
   it("explains why the table is empty", () => {
-    expect(emptyMessage("query", ["tbr"])).toBe("No bookmarks match your search.");
-    expect(emptyMessage("", ["tbr"])).toBe("No TBR bookmarks yet.");
-    expect(emptyMessage("", [])).toBe("Select a tier to show bookmarks.");
-    expect(emptyMessage("", ["tbr", "s"])).toBe("No bookmarks yet.");
+    expect(emptyMessage("query", ["tbr"], 4)).toBe("No bookmarks match your search.");
+    expect(emptyMessage("", ["tbr"], 4)).toBe("No TBR bookmarks yet.");
+    expect(emptyMessage("", [], 4)).toBe("Select a tier to show bookmarks.");
+    expect(emptyMessage("", ["tbr", "s"], 4)).toBe("No bookmarks yet.");
+  });
+
+  it("uses the generic empty copy when nothing is stored", () => {
+    expect(emptyMessage("", ["tbr"], 0)).toBe("No bookmarks yet.");
+    expect(emptyMessage("query", ["tbr"], 0)).toBe("No bookmarks match your search.");
   });
 });
+

@@ -5,8 +5,6 @@
     --surface: light-dark(#fff, #4a4742);
     --line: light-dark(#c2bdb4, #5a5752);
     --muted: light-dark(#6f6b66, #a8a49e);
-    --ok: light-dark(#2b6e40, #7dce96);
-    --danger: light-dark(#9c2921, #f0a39d);
     --accent: light-dark(#4c77f2, #7b9cff);
     --row-hover: light-dark(#eceae4, #2f2d2a);
     --track: light-dark(#ebe7e0, #2a2825);
@@ -203,9 +201,13 @@ button {
 
 .remove-button {
     align-self: center;
-    color: var(--danger);
+    color: var(--muted);
     font-weight: 700;
     padding: 8px;
+
+    &:hover {
+        color: var(--ink);
+    }
 }
 
 .search-control input {
@@ -226,12 +228,12 @@ button {
 
 .status,
 .library-status {
-    color: var(--ok);
+    color: var(--muted);
     font-size: 13px;
     font-weight: 700;
 
     &.error {
-        color: var(--danger);
+        color: var(--ink);
     }
 }
 

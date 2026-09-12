@@ -30,10 +30,6 @@ function setStatus(message: string, error = false) {
   status.classList.toggle("error", error);
 }
 
-function counted(prefix: string, count: number) {
-  return `${prefix} ${count} bookmark${count === 1 ? "" : "s"}.`;
-}
-
 async function withBusy(control: HTMLButtonElement, work: () => Promise<void>, fail: string) {
   control.disabled = true;
   try {
@@ -79,10 +75,11 @@ async function render() {
     const bookmarks = visibleBookmarks(stored, query, filters, newestFirst);
     rows.replaceChildren(...bookmarks.map(rowTemplate));
     emptyState.hidden = bookmarks.length > 0;
-    emptyState.textContent = emptyMessage(query, filters);
+    emptyState.textContent = emptyMessage(query, filters, stored.length);
     emptyImport.hidden = stored.length !== 0;
     dateSort.querySelector("span")!.textContent = newestFirst ? "↓" : "↑";
     dateSort.closest("th")?.setAttribute("aria-sort", newestFirst ? "descending" : "ascending");
+    await showIdleCount();
     return true;
   } catch {
     setStatus("Couldn’t load your bookmarks. Please reopen the library.", true);
@@ -98,7 +95,6 @@ async function updateTier(select: HTMLSelectElement | null) {
   try {
     const changed = await db.bookmarks.update(id, { tier: select.value as Tier, time: new Date().toISOString() });
     if (changed === 0) throw new Error("missing");
-    setStatus("Tier updated.");
     await render();
   } catch {
     await render();
@@ -128,7 +124,6 @@ async function deleteBookmark(button: HTMLButtonElement | null) {
     if (!bookmark) return;
     await db.bookmarks.delete(id);
     showUndo(bookmark);
-    setStatus("Bookmark deleted.");
     await render();
   } catch {
     setStatus("Couldn’t delete this bookmark. Please try again.", true);
@@ -142,7 +137,6 @@ async function undoDelete() {
   undoButton.disabled = true;
   try {
     await db.bookmarks.put(deletedBookmark);
-    setStatus("Bookmark restored.");
     deletedBookmark = undefined;
     hideManualPopover(undoToast);
     if (undoTimer) window.clearTimeout(undoTimer);
@@ -185,7 +179,7 @@ async function exportBookmarks() {
     download.download = `bookmarkit-${exportDocument.exportedAt.slice(0, 10)}.json`;
     download.click();
     window.setTimeout(() => URL.revokeObjectURL(blobUrl), 0);
-    setStatus(counted("Exported", exportDocument.bookmarks.length));
+    await showIdleCount();
   }, "Couldn’t export your bookmarks. Please try again.");
 }
 
@@ -205,8 +199,7 @@ async function importBookmarks() {
   importButton.disabled = true;
   emptyImport.disabled = true;
   try {
-    const importedCount = await applyImport(parseImport(await file.text()));
-    setStatus(counted("Added", importedCount));
+    await applyImport(parseImport(await file.text()));
     await render();
   } catch (error) {
     const message = error instanceof Error ? error.message : "The selected file could not be imported.";
@@ -237,7 +230,7 @@ async function showIdleCount() {
 
 async function initialize() {
   feedbackLink.href = feedbackUrl(chrome.runtime.getManifest().version);
-  if (await render()) await showIdleCount();
+  await render();
 }
 
 initialize();

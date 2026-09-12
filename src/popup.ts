@@ -1,5 +1,6 @@
 import "./styles.css";
 import { db, type Bookmark, type Tier } from "./database";
+import { SAVED_MESSAGE, SAVED_MESSAGE_MS, createLiveStatus } from "./status";
 import { normalizeUrl, pageTitle } from "./url";
 
 const pageTitleEl = document.querySelector<HTMLElement>("#page-title")!;
@@ -13,11 +14,7 @@ const tierInputs = [...document.querySelectorAll<HTMLInputElement>('input[name="
 const finishedTiers = [...document.querySelectorAll<HTMLElement>(".finished-tier")];
 let activeBookmark: Bookmark | undefined;
 let activeTab: chrome.tabs.Tab | undefined;
-
-function setStatus(message: string, error = false) {
-  status.textContent = message;
-  status.classList.toggle("error", error);
-}
+const { setStatus, setTemporaryStatus } = createLiveStatus(status);
 
 async function withBusy(control: HTMLButtonElement, work: () => Promise<void>, fail: string) {
   control.disabled = true;
@@ -96,7 +93,7 @@ async function capture() {
     const title = pageTitle(tab.title ?? "", pageUrl);
     const id = await db.bookmarks.add({ url: pageUrl, normalizedUrl, title, tier, time });
     showExisting({ id, url: pageUrl, normalizedUrl, title, tier, time });
-    setStatus("Saved to your reading list.");
+    setTemporaryStatus(SAVED_MESSAGE, SAVED_MESSAGE_MS);
   }, "Couldn’t save this bookmark. Please try again.");
 }
 
@@ -109,7 +106,6 @@ async function changeTier() {
   try {
     await db.bookmarks.update(activeBookmark.id, { tier: newTier, time: new Date().toISOString() });
     activeBookmark.tier = newTier;
-    setStatus("Tier updated.");
   } catch {
     setTier(oldTier);
     setStatus("Couldn’t update the tier. Please try again.", true);
@@ -124,7 +120,7 @@ async function deleteBookmark() {
   await withBusy(deleteButton, async () => {
     await db.bookmarks.delete(id);
     showExisting(undefined);
-    setStatus("Bookmark deleted.");
+    setStatus("");
   }, "Couldn’t delete this bookmark. Please try again.");
 }
 

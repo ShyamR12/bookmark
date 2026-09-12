@@ -15,7 +15,7 @@ Bookmarkit is a private reading list for pages you mean to come back to. It live
 
 Save the page you are on, keep a to-be-read list, and put finished items in S, A, or B tiers. Open a random or latest unread item when you want something to read. Search and filter the full library, change tiers, and delete with a short undo window. Import and export your list from the library, or share feedback from there.
 
-How to use it: click the Bookmarkit icon to see the current page's title and site. Choose a tier (TBR?, TBR, S, A, or B) and save. If the page is already saved, change its tier or remove it. Use Random or Latest to open something from your unread list, or open Library for search, filters, the full list, import, export, and feedback.
+How to use it: click the Bookmarkit icon to see the current page's title and site. Choose TBR? or TBR, then save. After it is saved you can change the tier (including S, A, or B) or remove it. Use Random or Latest to open something from your unread list, or open Library for search, filters, the full list, import, export, and feedback.
 
 Your list stays on this computer. Bookmarkit does not sign you in, does not sync, and does not send your pages to a server. The only permission it asks for is access to the tab you opened it from, so it can save that page's address and title.
 
