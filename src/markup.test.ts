@@ -13,6 +13,12 @@ describe("popup markup", () => {
   it("declares light and dark color schemes", () => {
     expect(popup).toContain('<meta name="color-scheme" content="light dark"');
   });
+
+  it("uses one page-action button", () => {
+    expect(popup).toContain('id="bookmark-button"');
+    expect(popup).not.toContain('id="delete-button"');
+    expect(popup).not.toContain("remove-button");
+  });
 });
 
 describe("library markup", () => {
@@ -88,8 +94,10 @@ describe("theme and a11y CSS", () => {
     expect(css).not.toMatch(/--danger:/);
     expect(css).toMatch(/\.status,\s*\.library-status\s*\{[\s\S]*?color:\s*var\(--muted\)/);
     expect(css).toMatch(/&\.error\s*\{[\s\S]*?color:\s*var\(--ink\)/);
-    expect(css).toMatch(/\.remove-button\s*\{[\s\S]*?color:\s*var\(--muted\)/);
-    expect(css).toMatch(/\.remove-button[\s\S]*?:hover[\s\S]*?color:\s*var\(--ink\)/);
+    expect(css).toMatch(/\.bookmark-button\s*\{[\s\S]*?padding:\s*12px/);
+    expect(css).toMatch(/\.bookmark-button\s*\{[\s\S]*?border:\s*1px solid transparent/);
+    expect(css).toMatch(/\[data-mode="remove"\][\s\S]*?background:\s*transparent/);
+    expect(css).not.toMatch(/\.remove-button\s*\{/);
   });
 });
 

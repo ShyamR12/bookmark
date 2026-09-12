@@ -183,30 +183,38 @@ button {
 
 .bookmark-button {
     width: 100%;
+    border: 1px solid transparent;
     border-radius: var(--radius);
     background: var(--ink);
     color: var(--page);
     font-weight: 700;
     padding: 12px;
+    transition: background 150ms, color 150ms, border-color 150ms;
 
     &:hover:not(:disabled) {
         opacity: 0.88;
     }
 
-    &:disabled {
+    &:disabled:not([data-mode="saved"]) {
         opacity: 0.4;
         cursor: not-allowed;
     }
-}
 
-.remove-button {
-    align-self: center;
-    color: var(--muted);
-    font-weight: 700;
-    padding: 8px;
+    &[data-mode="saved"]:disabled {
+        cursor: default;
+        opacity: 1;
+    }
 
-    &:hover {
-        color: var(--ink);
+    &[data-mode="remove"] {
+        background: transparent;
+        border-color: var(--control-line);
+        color: var(--muted);
+
+        &:hover:not(:disabled) {
+            opacity: 1;
+            color: var(--ink);
+            border-color: var(--ink);
+        }
     }
 }
 

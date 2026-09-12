@@ -1,12 +1,19 @@
 import "./styles.css";
 import { db, type Bookmark, type Tier } from "./database";
-import { SAVED_MESSAGE, SAVED_MESSAGE_MS, createLiveStatus } from "./status";
+import { createLiveStatus } from "./status";
 import { normalizeUrl, pageTitle } from "./url";
+
+const SAVED_HOLD_MS = 1250;
+const ACTION_LABEL = {
+  bookmark: "Bookmarkit",
+  saved: "Saved",
+  remove: "Remove bookmark"
+} as const;
+type ActionMode = keyof typeof ACTION_LABEL;
 
 const pageTitleEl = document.querySelector<HTMLElement>("#page-title")!;
 const pageHost = document.querySelector<HTMLElement>("#page-host")!;
 const bookmarkButton = document.querySelector<HTMLButtonElement>("#bookmark-button")!;
-const deleteButton = document.querySelector<HTMLButtonElement>("#delete-button")!;
 const status = document.querySelector<HTMLElement>("#status")!;
 const randomButton = document.querySelector<HTMLButtonElement>("#random-button")!;
 const latestButton = document.querySelector<HTMLButtonElement>("#latest-button")!;
@@ -14,7 +21,22 @@ const tierInputs = [...document.querySelectorAll<HTMLInputElement>('input[name="
 const finishedTiers = [...document.querySelectorAll<HTMLElement>(".finished-tier")];
 let activeBookmark: Bookmark | undefined;
 let activeTab: chrome.tabs.Tab | undefined;
-const { setStatus, setTemporaryStatus } = createLiveStatus(status);
+let actionMode: ActionMode = "bookmark";
+let savedHold: ReturnType<typeof setTimeout> | undefined;
+const { setStatus } = createLiveStatus(status);
+
+function clearSavedHold() {
+  if (savedHold === undefined) return;
+  clearTimeout(savedHold);
+  savedHold = undefined;
+}
+
+function setActionMode(mode: ActionMode) {
+  actionMode = mode;
+  bookmarkButton.textContent = ACTION_LABEL[mode];
+  bookmarkButton.dataset.mode = mode;
+  bookmarkButton.disabled = mode === "saved" || (mode === "bookmark" && !pageIsSavable());
+}
 
 async function withBusy(control: HTMLButtonElement, work: () => Promise<void>, fail: string) {
   control.disabled = true;
@@ -23,7 +45,8 @@ async function withBusy(control: HTMLButtonElement, work: () => Promise<void>, f
   } catch {
     setStatus(fail, true);
   } finally {
-    control.disabled = control === bookmarkButton && (Boolean(activeBookmark) || !pageIsSavable());
+    if (control === bookmarkButton) setActionMode(actionMode);
+    else control.disabled = false;
   }
 }
 
@@ -57,13 +80,24 @@ function showPage(tab: chrome.tabs.Tab | undefined) {
   pageHost.textContent = hostnameOf(url);
 }
 
-function showExisting(bookmark: Bookmark | undefined) {
+function showExisting(bookmark: Bookmark | undefined, confirm = false) {
   activeBookmark = bookmark;
-  bookmarkButton.hidden = Boolean(bookmark);
-  bookmarkButton.disabled = Boolean(bookmark) || !pageIsSavable();
-  deleteButton.hidden = !bookmark;
+  clearSavedHold();
   for (const label of finishedTiers) label.hidden = !bookmark;
   setTier(bookmark?.tier ?? "tbr-candidate");
+  if (!bookmark) {
+    setActionMode("bookmark");
+    return;
+  }
+  if (confirm) {
+    setActionMode("saved");
+    savedHold = setTimeout(() => {
+      savedHold = undefined;
+      if (activeBookmark) setActionMode("remove");
+    }, SAVED_HOLD_MS);
+    return;
+  }
+  setActionMode("remove");
 }
 
 async function findCurrentBookmark() {
@@ -85,15 +119,13 @@ async function capture() {
     const existing = await db.bookmarks.where("normalizedUrl").equals(normalizedUrl).first();
     if (existing) {
       showExisting(existing);
-      setStatus("This page is already bookmarked.");
       return;
     }
     const tier = currentTier();
     const time = new Date().toISOString();
     const title = pageTitle(tab.title ?? "", pageUrl);
     const id = await db.bookmarks.add({ url: pageUrl, normalizedUrl, title, tier, time });
-    showExisting({ id, url: pageUrl, normalizedUrl, title, tier, time });
-    setTemporaryStatus(SAVED_MESSAGE, SAVED_MESSAGE_MS);
+    showExisting({ id, url: pageUrl, normalizedUrl, title, tier, time }, true);
   }, "Couldn’t save this bookmark. Please try again.");
 }
 
@@ -117,7 +149,7 @@ async function changeTier() {
 async function deleteBookmark() {
   const id = activeBookmark?.id;
   if (!id) return;
-  await withBusy(deleteButton, async () => {
+  await withBusy(bookmarkButton, async () => {
     await db.bookmarks.delete(id);
     showExisting(undefined);
     setStatus("");
@@ -137,9 +169,11 @@ async function openFromList(button: HTMLButtonElement, pick: (bookmarks: Bookmar
   }, "Couldn’t open this bookmark. Please try again.");
 }
 
-bookmarkButton.addEventListener("click", capture);
+bookmarkButton.addEventListener("click", () => {
+  if (actionMode === "bookmark") capture();
+  else if (actionMode === "remove") deleteBookmark();
+});
 document.querySelector(".tier-pills")!.addEventListener("change", changeTier);
-deleteButton.addEventListener("click", deleteBookmark);
 document.querySelector<HTMLButtonElement>("#library-button")!.addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("library.html") });
 });
