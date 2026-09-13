@@ -24,13 +24,13 @@ export function mergeAdditions(imported: Bookmark[], existingUrls: readonly stri
   return imported.filter((bookmark) => !have.has(bookmark.normalizedUrl));
 }
 
-function parseBookmark(item: unknown, index: number, seen: Set<string>): Bookmark {
+function parseBookmark(item: unknown, index: number, seen: Set<string>): Bookmark | undefined {
   const label = `Bookmark ${index + 1}`;
   assert(isRecord(item), `${label} must be an object.`);
   assert(typeof item.url === "string", `${label} has an invalid URL.`);
   const normalizedUrl = normalizeUrl(item.url);
   assert(normalizedUrl, `${label} has an invalid URL.`);
-  assert(!seen.has(normalizedUrl), "The file contains a duplicate URL.");
+  if (seen.has(normalizedUrl)) return undefined;
   seen.add(normalizedUrl);
   assert(typeof item.title === "string" && item.title.trim() !== "", `${label} has an empty title.`);
   assert(typeof item.tier === "string" && tiers.has(item.tier as Tier), `${label} has an invalid tier.`);
@@ -50,5 +50,10 @@ export function parseImport(contents: string): Bookmark[] {
   assert(value.schemaVersion === 1, "The file uses an unsupported schema version.");
   assert(Array.isArray(value.bookmarks), "The file must contain a bookmarks array.");
   const seen = new Set<string>();
-  return value.bookmarks.map((item, index) => parseBookmark(item, index, seen));
+  const bookmarks: Bookmark[] = [];
+  for (const [index, item] of value.bookmarks.entries()) {
+    const bookmark = parseBookmark(item, index, seen);
+    if (bookmark) bookmarks.push(bookmark);
+  }
+  return bookmarks;
 }

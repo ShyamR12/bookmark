@@ -38,11 +38,19 @@ describe("parseImport", () => {
     expect(parsed.normalizedUrl).toBe("https://example.com/a");
   });
 
+  it("keeps the first bookmark when the file repeats a URL", () => {
+    const later = { ...exportedBookmark, title: "Later copy", tier: "s" as const };
+    const other = { ...exportedBookmark, url: "https://example.com/b", title: "Other" };
+    expect(parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [exportedBookmark, later, other] }))).toEqual([
+      bookmark,
+      { ...bookmark, url: other.url, normalizedUrl: "https://example.com/b", title: other.title }
+    ]);
+  });
+
   it("rejects invalid files", () => {
     expect(() => parseImport("{")).toThrow("not valid JSON");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 2, bookmarks: [] }))).toThrow("unsupported schema version");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, url: "chrome://extensions" }] }))).toThrow("invalid URL");
-    expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [bookmark, bookmark] }))).toThrow("duplicate URL");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, title: "  " }] }))).toThrow("empty title");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, tier: "z" }] }))).toThrow("invalid tier");
     expect(() => parseImport(JSON.stringify({ schemaVersion: 1, bookmarks: [{ ...bookmark, time: "soon" }] }))).toThrow("invalid stored time");
